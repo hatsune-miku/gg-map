@@ -1,15 +1,18 @@
 package com.example.map.model;
 
-import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class Address {
+import java.io.Serializable;
+
+public class Address implements Serializable {
     String name;
     String address;
     String service;
     double lat;
     double lng;
-    String number;
-    String headname;
+    String phoneNumber;
+    String headName;
 
     public Address(String name, String address, String service, double lat, double lng, String number, String headname) {
         this.name = name;
@@ -17,8 +20,8 @@ public class Address {
         this.service = service;
         this.lat = lat;
         this.lng = lng;
-        this.number = number;
-        this.headname = headname;
+        this.phoneNumber = number;
+        this.headName = headname;
     }
 
     public String getName() {
@@ -53,13 +56,21 @@ public class Address {
         this.lng = lng;
     }
 
-    public String getNumber(){ return number; }
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
 
-    public void setNumber(String number) { this.number = number; }
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 
-    public String getHeadname() { return headname; }
+    public String getHeadName() {
+        return headName;
+    }
 
-    public void setHeadname(String headname) { this.headname = headname; }
+    public void setHeadName(String headName) {
+        this.headName = headName;
+    }
 
     public String getService() {
         return service;
@@ -67,27 +78,5 @@ public class Address {
 
     public void setService(String service) {
         this.service = service;
-    }
-
-    public Bundle toBundle() {
-        Bundle ret = new Bundle();
-        ret.putString("name", getName());
-        ret.putString("address", getAddress());
-        ret.putDouble("lat", getLat());
-        ret.putDouble("lng", getLng());
-        ret.putString("service", getService());
-        return ret;
-    }
-
-    public static Address fromBundle(Bundle bundle) {
-        return new Address(
-                bundle.getString("name"),
-                bundle.getString("address"),
-                bundle.getString("service"),
-                bundle.getDouble("lat"),
-                bundle.getDouble("lng"),
-                bundle.getString("number"),
-                bundle.getString("headname")
-        );
     }
 }

@@ -6,7 +6,6 @@ import androidx.appcompat.app.AlertDialog;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -21,6 +20,7 @@ import com.amap.api.maps2d.model.Marker;
 import com.amap.api.maps2d.model.MarkerOptions;
 import com.example.map.R;
 import com.example.map.databinding.ActivityMainBinding;
+import com.example.map.util.AddressUtil;
 import com.example.map.model.Address;
 import com.example.map.model.AddressBook;
 import com.example.map.model.AddressAssetParser;
@@ -82,7 +82,7 @@ public class MainActivity extends BaseActivity {
      */
     private void showAddressInDetails(Address address) {
         Intent intent = new Intent();
-        intent.putExtra("bundle", address.toBundle());
+        AddressUtil.putIntoIntent(address, intent);
         intent.setClass(this, DetailsActivity.class);
         startActivity(intent);
     }

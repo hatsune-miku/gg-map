@@ -8,17 +8,33 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.example.map.R;
+import com.example.map.annotation.AutoBind;
+import com.example.map.model.Address;
 
 import java.util.Objects;
 
 public class DetailsFragment extends PreferenceFragmentCompat {
+    @AutoBind
     private Preference prefName;
+
+    @AutoBind
     private Preference prefAddress;
+
+    @AutoBind
     private Preference prefService;
-    private Preference prefLat;
-    private Preference prefLng;
-    private Preference prefNum;
-    private Preference prefHeadname;
+
+    @AutoBind
+    private Preference prefPhoneNumber;
+
+    @AutoBind
+    private Preference prefHeadName;
+
+    private Address address;
+
+    public DetailsFragment(Address address) {
+        this.address = address;
+    }
+
 
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
@@ -31,21 +47,11 @@ public class DetailsFragment extends PreferenceFragmentCompat {
             return;
         }
 
-        prefName = findPreference("prefName");
-        prefAddress = findPreference("prefAddress");
-        prefService = findPreference("prefService");
-        //prefLat = findPreference("prefLat");
-        //prefLng = findPreference("prefLng");
-        prefNum = findPreference("prefNum");
-        prefLng = findPreference("prefHeadname");
-
         prefName.setSummary(arguments.getString("name"));
         prefAddress.setSummary(arguments.getString("address"));
         prefService.setSummary(arguments.getString("service"));
-        //prefLat.setSummary(String.valueOf(arguments.getDouble("lat")));
-        //prefLng.setSummary(String.valueOf(arguments.getDouble("lng")));
-        prefNum.setSummary(arguments.getString("number"));
-        prefHeadname.setSummary(arguments.getString("headname"));
+        prefPhoneNumber.setSummary(arguments.getString("phone_number"));
+        prefHeadName.setSummary(arguments.getString("head_name"));
 
         requireActivity().setTitle("详细信息");
     }
