@@ -1,10 +1,8 @@
 package com.example.map.model;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import android.util.Log;
-import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 
@@ -44,7 +42,11 @@ public class AddressAssetParser {
         ADDRESS(2, "address"),
         LNG(3, "经度"),
         LAT(4, "纬度"),
-        SERVICE(5, "service");
+        SERVICE(5, "service"),
+        NUMBER(6, "number"),
+        HEADNAME(7,"HEADNAME");
+
+
 
         private final int index;
         private final String title;
@@ -88,6 +90,7 @@ public class AddressAssetParser {
             addressBookName += ".xlsx";
         }
 
+        // 从资源文件中读取数据
         reloadExcelData(context.getAssets().open(addressBookName));
     }
 
@@ -167,7 +170,9 @@ public class AddressAssetParser {
             cellStringValueOrDefault(row, AddressColumn.ADDRESS.getIndex(), "地址读取失败"),
             cellStringValueOrDefault(row, AddressColumn.SERVICE.getIndex(), "服务项目读取失败"),
             getLatAt(rowIndex),
-            getLngAt(rowIndex)
+            getLngAt(rowIndex),
+                cellStringValueOrDefault(row, AddressColumn.NUMBER.getIndex(), "名称读取失败"),
+                cellStringValueOrDefault(row, AddressColumn.HEADNAME.getIndex(), "地址读取失败")
         );
     }
 

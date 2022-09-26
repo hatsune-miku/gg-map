@@ -1,37 +1,28 @@
 package com.example.map.fragment;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
-import com.amap.api.maps2d.model.BitmapDescriptorFactory;
 import com.example.map.R;
-import com.example.map.annotation.AutoBind;
-import com.example.map.annotation.processor.PreferenceBinder;
-import com.example.map.model.Address;
+
+import java.util.Objects;
 
 public class DetailsFragment extends PreferenceFragmentCompat {
-    @AutoBind
     private Preference prefName;
-
-    @AutoBind
     private Preference prefAddress;
-
-    @AutoBind
     private Preference prefService;
-
-    @AutoBind
     private Preference prefLat;
-
-    @AutoBind
     private Preference prefLng;
+    private Preference prefNum;
+    private Preference prefHeadname;
 
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         addPreferencesFromResource(R.xml.pref_details);
-        PreferenceBinder.bind(this);
 
         Bundle arguments = getArguments();
 
@@ -40,13 +31,21 @@ public class DetailsFragment extends PreferenceFragmentCompat {
             return;
         }
 
-        Address address = Address.fromBundle(arguments);
+        prefName = findPreference("prefName");
+        prefAddress = findPreference("prefAddress");
+        prefService = findPreference("prefService");
+        //prefLat = findPreference("prefLat");
+        //prefLng = findPreference("prefLng");
+        prefNum = findPreference("prefNum");
+        prefLng = findPreference("prefHeadname");
 
-        prefName.setSummary(address.getName());
-        prefAddress.setSummary(address.getAddress());
-        prefService.setSummary(address.getService());
-        prefLat.setSummary(String.valueOf(address.getLat()));
-        prefLng.setSummary(String.valueOf(address.getLng()));
+        prefName.setSummary(arguments.getString("name"));
+        prefAddress.setSummary(arguments.getString("address"));
+        prefService.setSummary(arguments.getString("service"));
+        //prefLat.setSummary(String.valueOf(arguments.getDouble("lat")));
+        //prefLng.setSummary(String.valueOf(arguments.getDouble("lng")));
+        prefNum.setSummary(arguments.getString("number"));
+        prefHeadname.setSummary(arguments.getString("headname"));
 
         requireActivity().setTitle("详细信息");
     }

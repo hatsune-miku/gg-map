@@ -19,14 +19,14 @@
             android:title="服务项目"
             app:key="prefService" />
         <Preference
-            android:id="@+id/prefLat"
+            android:id="@+id/prefNum"
             android:summary="http://www.baidu.com"
-            android:title="经度"
-            app:key="prefLat" />
+            android:title="手机号"
+            app:key="prefNum" />
         <Preference
-            android:id="@+id/prefLng"
+            android:id="@+id/prefHeadname"
             android:summary="三方工作站是一个一个三方工作站"
-            android:title="纬度"
-            app:key="prefLng" />
+            android:title="负责人"
+            app:key="prefHeadname" />
     </PreferenceCategory>
 </PreferenceScreen>
