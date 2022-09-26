@@ -14,14 +14,22 @@ public class Address implements Serializable {
     String phoneNumber;
     String headName;
 
-    public Address(String name, String address, String service, double lat, double lng, String number, String headname) {
+    public Address(
+        String name,
+        String address,
+        String service,
+        String phoneNumber,
+        String headName,
+        double lat,
+        double lng
+    ) {
         this.name = name;
         this.address = address;
         this.service = service;
         this.lat = lat;
         this.lng = lng;
-        this.phoneNumber = number;
-        this.headName = headname;
+        this.phoneNumber = phoneNumber;
+        this.headName = headName;
     }
 
     public String getName() {

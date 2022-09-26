@@ -2,6 +2,7 @@ package com.example.map.model;
 
 import android.content.Context;
 
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -25,12 +27,11 @@ public class AddressAssetParser {
         INDEX(0, ""),
         NAME(1, "name"),
         ADDRESS(2, "address"),
-        LNG(3, "经度"),
-        LAT(4, "纬度"),
+        LNG(3, "longitude"),
+        LAT(4, "latitude"),
         SERVICE(5, "service"),
-        NUMBER(6, "number"),
-        HEADNAME(7,"HEADNAME");
-
+        PHONE_NUMBER(6, "phone_number"),
+        HEAD_NAME(7,"head_name");
 
 
         private final int index;
@@ -139,9 +140,48 @@ public class AddressAssetParser {
         return row.getCell(column.getIndex());
     }
 
-    public String cellStringValueOrDefault(XSSFRow row, int index, String defaultValue) {
+    public String cellValueForceStringOrDefault(XSSFRow row, int index, String defaultValue) {
         try {
-            return row.getCell(index).getStringCellValue();
+            XSSFCell cell = row.getCell(index);
+
+            // Try string type.
+            try {
+                String value = cell.getStringCellValue();
+                if (value != null) return value;
+            }
+            catch (Exception e) { /* Ignore */ }
+
+            // Try number type.
+            try {
+                return String.valueOf(cell.getNumericCellValue());
+            }
+            catch (Exception e) { /* Ignore */ }
+
+            // Try date type.
+            try {
+                Date value = cell.getDateCellValue();
+                if (value != null) return value.toString();
+            }
+            catch (Exception e) { /* Ignore */ }
+
+            // Try boolean type.
+            try {
+                return String.valueOf(cell.getBooleanCellValue());
+            }
+            catch (Exception e) { /* Ignore */ }
+
+            return defaultValue;
+        }
+        catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
+    public String cellValueOrDefault(XSSFRow row, int index, String defaultValue) {
+        try {
+            XSSFCell cell = row.getCell(index);
+            cell.setCellType(Cell.CELL_TYPE_STRING);
+            return cell.getStringCellValue();
         }
         catch (Exception e) {
             return defaultValue;
@@ -150,14 +190,15 @@ public class AddressAssetParser {
 
     public Address getAddressAt(int rowIndex) throws Exception {
         XSSFRow row = sharedSheet.getRow(rowIndex);
+
         return new Address(
-            cellStringValueOrDefault(row, AddressColumn.NAME.getIndex(), "名称读取失败"),
-            cellStringValueOrDefault(row, AddressColumn.ADDRESS.getIndex(), "地址读取失败"),
-            cellStringValueOrDefault(row, AddressColumn.SERVICE.getIndex(), "服务项目读取失败"),
+            cellValueOrDefault(row, AddressColumn.NAME.getIndex(), "(名称数据为空)"),
+            cellValueOrDefault(row, AddressColumn.ADDRESS.getIndex(), "(地址数据为空)"),
+            cellValueOrDefault(row, AddressColumn.SERVICE.getIndex(), "(服务项目数据为空)"),
+            cellValueOrDefault(row, AddressColumn.PHONE_NUMBER.getIndex(), "(电话号码数据为空)"),
+            cellValueOrDefault(row, AddressColumn.HEAD_NAME.getIndex(), "(负责人信息数据为空)"),
             getLatAt(rowIndex),
-            getLngAt(rowIndex),
-                cellStringValueOrDefault(row, AddressColumn.NUMBER.getIndex(), "名称读取失败"),
-                cellStringValueOrDefault(row, AddressColumn.HEADNAME.getIndex(), "地址读取失败")
+            getLngAt(rowIndex)
         );
     }
 

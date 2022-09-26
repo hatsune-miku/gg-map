@@ -9,6 +9,7 @@ import androidx.preference.PreferenceFragmentCompat;
 
 import com.example.map.R;
 import com.example.map.annotation.AutoBind;
+import com.example.map.annotation.processor.PreferenceBinder;
 import com.example.map.model.Address;
 
 import java.util.Objects;
@@ -39,19 +40,13 @@ public class DetailsFragment extends PreferenceFragmentCompat {
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         addPreferencesFromResource(R.xml.pref_details);
+        PreferenceBinder.bind(this);
 
-        Bundle arguments = getArguments();
-
-        if (arguments == null) {
-            requireActivity().finish();
-            return;
-        }
-
-        prefName.setSummary(arguments.getString("name"));
-        prefAddress.setSummary(arguments.getString("address"));
-        prefService.setSummary(arguments.getString("service"));
-        prefPhoneNumber.setSummary(arguments.getString("phone_number"));
-        prefHeadName.setSummary(arguments.getString("head_name"));
+        prefName.setSummary(address.getName());
+        prefAddress.setSummary(address.getAddress());
+        prefService.setSummary(address.getService());
+        prefPhoneNumber.setSummary(address.getPhoneNumber());
+        prefHeadName.setSummary(address.getHeadName());
 
         requireActivity().setTitle("详细信息");
     }

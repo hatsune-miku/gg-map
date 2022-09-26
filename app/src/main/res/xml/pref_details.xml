@@ -21,7 +21,7 @@
         <Preference
             android:id="@+id/prefPhoneNumber"
             android:summary="http://www.baidu.com"
-            android:title="手机号"
+            android:title="联系方式"
             app:key="prefPhoneNumber" />
         <Preference
             android:id="@+id/prefHeadName"
