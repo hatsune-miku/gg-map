@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="详细信息">
+        <Preference
+            android:id="@+id/prefName"
+            android:summary="三方工作站"
+            android:title="名称"
+            app:key="prefName" />
+        <Preference
+            android:id="@+id/prefAddress"
+            android:summary="010-12345678"
+            android:title="地址"
+            app:key="prefAddress" />
+        <Preference
+            android:id="@+id/prefService"
+            android:summary="111"
+            android:title="服务项目"
+            app:key="prefService" />
+        <Preference
+            android:id="@+id/prefLat"
+            android:summary="http://www.baidu.com"
+            android:title="经度"
+            app:key="prefLat" />
+        <Preference
+            android:id="@+id/prefLng"
+            android:summary="三方工作站是一个一个三方工作站"
+            android:title="纬度"
+            app:key="prefLng" />
+    </PreferenceCategory>
+</PreferenceScreen>
