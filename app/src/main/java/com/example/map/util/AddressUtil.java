@@ -4,10 +4,8 @@ import android.content.Intent;
 
 import com.example.map.model.Address;
 
-import java.io.Serializable;
-
 public class AddressUtil {
-    public static Address fromIntent(Intent intent) {
+    public static Address extractFromIntent(Intent intent) {
         return (Address) intent.getSerializableExtra("address");
     }
 

@@ -1,4 +1,4 @@
-package com.example.map.annotation;
+package com.example.map.annotation.preference;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

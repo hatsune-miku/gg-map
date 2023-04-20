@@ -22,13 +22,14 @@ import com.example.map.R;
 import com.example.map.databinding.ActivityMainBinding;
 import com.example.map.util.AddressUtil;
 import com.example.map.model.Address;
-import com.example.map.model.AddressBook;
-import com.example.map.model.AddressAssetParser;
+import com.example.map.model.AddressResource;
+import com.example.map.model.SheetHelper;
+
+import org.apache.poi.xssf.usermodel.XSSFRow;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -41,13 +42,16 @@ public class MainActivity extends BaseActivity {
 
     private ActivityMainBinding binding;
 
+    /**
+     * 地图对象和地图SDK的对象
+     */
     private MapView mapView = null;
     private AMap amap = null;
 
-    private final AddressBook[] addresses = AddressBook.values();
-    private int addrIndex = 0;
+    private final List<AddressResource> addressResources = List.of(AddressResource.values());
+    private AddressResource currentAddressResource = addressResources.get(0);
 
-    private Map<String, AddressAssetParser> parsers = new HashMap<>();
+    private final Map<String, SheetHelper> cachedSheetHelpers = new HashMap<>();
     private final List<Marker> markers = new ArrayList<>();
 
     private DisplayMode displayMode = DisplayMode.SHOW_ONE;
@@ -56,13 +60,12 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         // 获取地图控件引用
         mapView = binding.map;
-
-        // 在activity执行onCreate时执行mMapView.onCreate(savedInstanceState)，创建地图
         mapView.onCreate(savedInstanceState);
 
         // 初始化高德地图控制器对象
@@ -71,13 +74,13 @@ public class MainActivity extends BaseActivity {
         }
 
         bind();
-
         clearMarkers();
-        showMarkersForAddressWithIndex(addrIndex);
+        showMarkersForAddressFriendly(currentAddressResource);
     }
 
     /**
      * 启动DetailsActivity然后在其中显示地址信息
+     *
      * @param address -
      */
     private void showAddressInDetails(Address address) {
@@ -94,24 +97,26 @@ public class MainActivity extends BaseActivity {
         // 标点点击事件
         amap.setOnMarkerClickListener(marker -> {
             // Marker not binded to an address?
-            if (!(marker.getObject() instanceof Address)) {
+            if (!(marker.getObject() instanceof Address address)) {
                 return false;
             }
 
-            Address address = (Address) marker.getObject();
             showAddressInDetails(address);
             return false;
         });
 
         // 切换位置
         binding.fabSwitchArea.setOnClickListener(v -> {
-            CharSequence[] array = Arrays.stream(addresses)
-                .map(AddressBook::getName)
-                .toArray(CharSequence[]::new);
+            String[] array = addressResources.stream()
+                .map(r -> "🏠 " + r.getName())
+                .toArray(String[]::new);
+
             new AlertDialog.Builder(this)
+                .setTitle("切换地点...")
                 .setItems(array, (dialog, which) -> {
                     clearMarkers();
-                    showMarkersForAddressWithIndex(which);
+                    currentAddressResource = addressResources.get(which);
+                    showMarkersForAddressFriendly(currentAddressResource);
                     displayMode = DisplayMode.SHOW_ONE;
                 })
                 .setCancelable(true)
@@ -120,57 +125,37 @@ public class MainActivity extends BaseActivity {
         });
     }
 
+    private SheetHelper retrieveSheetHelper(String resourceName) throws IOException {
+        if (cachedSheetHelpers.containsKey(resourceName)) {
+            return cachedSheetHelpers.get(resourceName);
+        }
+
+        // Create new if not cached.
+        SheetHelper helper = new SheetHelper(this, currentAddressResource.getResourceName());
+        cachedSheetHelpers.put(resourceName, helper);
+        return helper;
+    }
+
     /**
      * 切换地区，更新标点
-     *
+     * <p>
      * 不会自动清空之前的标点，甚至同地区的标点也会重复添加
-     * 所以调用之前记得手动调用clearMarker()
-     *
+     * 所以调用之前记得手动调用 <code>clearMarker()</code>
+     * <p>
      * 带有缓存功能，不会重复解析xlsx文档
-     *
-     * @param newAddressIndex -
      */
-    private void showMarkersForAddressWithIndex(int newAddressIndex) {
-        String resourceName = addresses[newAddressIndex].getResourceName();
-        AddressAssetParser parser;
-        addrIndex = newAddressIndex;
+    private void showMarkersForAddress(AddressResource addressResource) throws IOException {
+        String resourceName = addressResource.getResourceName();
+        SheetHelper helper = retrieveSheetHelper(resourceName);
+
+        loadingDialogOpen("创建标点...");
 
         try {
-            loadingBoxStart("加载地址信息...");
-
-            // 分析地址数据
-            try {
-                if (parsers.containsKey(resourceName)) {
-                    parser = parsers.get(resourceName);
-                }
-                else {
-                    parser = new AddressAssetParser(
-                        this, addresses[addrIndex].getResourceName());
-                    parsers.put(resourceName, parser);
-                }
-            } catch (IOException e) {
-                String errorMessage;
-
-                if (e instanceof FileNotFoundException) {
-                    // 资源文件没找到？
-                    errorMessage = String.format(
-                        "错误：找不到资源文件 (%s).", addresses[addrIndex].getResourceName());
-                } else {
-                    errorMessage = String.format(
-                        "错误：无法读取资源文件 (%s).", e.getLocalizedMessage());
-                }
-
-                alertBox(errorMessage, getString(R.string.app_name), null);
-                return;
-            }
-
-            loadingBoxUpdate("创建标点...");
-
-            assert parser != null;
-            int lastRowIndex = parser.getLastRowIndex();
-            for (int i = parser.getFirstRowIndex(); i <= lastRowIndex; ++i) {
+            int lastRowIndex = helper.getLastRowIndex();
+            for (int i = helper.getFirstRowIndex(); i <= lastRowIndex; ++i) {
                 try {
-                    addMarker(parser.getAddressAt(i));
+                    XSSFRow row = helper.getSheet().getRow(i);
+                    addMarker(Address.fromRow(row));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -178,28 +163,40 @@ public class MainActivity extends BaseActivity {
 
             // 更新标签内容
             binding.textCurrentLocation.setText(
-                addresses[addrIndex].getName());
+                addressResource.getName());
             setTitle(String.format(Locale.ROOT, "%s (共 %d 个标点)",
-                addresses[addrIndex].getName(), lastRowIndex));
+                addressResource.getName(), lastRowIndex));
 
             // 缩放
             zoomToShowAllMarkers();
         } finally {
-            loadingBoxClose();
+            loadingDialogClose();
         }
     }
 
     /**
-     * 同时展示所有地区的所有标点！
+     * 清空当前标点，然后同时展示所有地区的所有标点！
      */
     private void showMarkersForAllAddresses() {
         clearMarkers();
-        for (int i = 0; i < addresses.length; ++i) {
-            showMarkersForAddressWithIndex(i);
+        ArrayList<String> errorMessages = new ArrayList<>();
+
+        for (AddressResource resource : addressResources) {
+            try {
+                showMarkersForAddress(resource);
+            } catch (IOException e) {
+                errorMessages.add(createFriendlyErrorMessage(e, resource));
+            }
         }
+
+        if (!errorMessages.isEmpty()) {
+            String errorMessage = "遇到下列错误:\n\n" + String.join("\n", errorMessages);
+            showAlertDialog(errorMessage, getString(R.string.app_name));
+        }
+
         binding.textCurrentLocation.setText("所有地区");
-        setTitle("所有地区共 " + parsers.values().stream()
-            .map(AddressAssetParser::getLastRowIndex)
+        setTitle("所有地区共 " + cachedSheetHelpers.values().stream()
+            .map(SheetHelper::getLastRowIndex)
             .reduce(0, Integer::sum) + " 个标点");
     }
 
@@ -252,23 +249,46 @@ public class MainActivity extends BaseActivity {
             builder.include(marker.getPosition());
         }
         amap.moveCamera(CameraUpdateFactory.newLatLngBounds(
-            builder.build(), 0
-        ));
+            builder.build(), 0));
     }
 
     protected void toggleDisplayMode() {
-        if (displayMode == DisplayMode.SHOW_ONE) {
-            showMarkersForAllAddresses();
+        switch (displayMode) {
+            case SHOW_ONE -> {
+                showMarkersForAllAddresses();
+                displayMode = DisplayMode.SHOW_ALL;
+                Toast.makeText(this, "现在将同时展示所有标点", Toast.LENGTH_SHORT).show();
+            }
 
-            displayMode = DisplayMode.SHOW_ALL;
-            Toast.makeText(this, "现在将同时展示所有标点", Toast.LENGTH_SHORT).show();
+            case SHOW_ALL -> {
+                clearMarkers();
+                showMarkersForAddressFriendly(currentAddressResource);
+                displayMode = DisplayMode.SHOW_ONE;
+                Toast.makeText(this, "现在将仅显示指定标点", Toast.LENGTH_SHORT).show();
+            }
         }
-        else {
-            clearMarkers();
-            showMarkersForAddressWithIndex(addrIndex);
+    }
 
-            displayMode = DisplayMode.SHOW_ONE;
-            Toast.makeText(this, "现在将仅显示指定标点", Toast.LENGTH_SHORT).show();
+    private String createFriendlyErrorMessage(Exception e, AddressResource resource) {
+        if (e instanceof FileNotFoundException) {
+            // 资源文件没找到？
+            return String.format(
+                "资源文件 (%s) 不存在",
+                resource.getResourceName());
+        }
+
+        return String.format(
+            "资源文件 (%s) 存在但无法读取，因为 (%s)",
+            resource.getResourceName(),
+            e.getLocalizedMessage());
+    }
+
+    private void showMarkersForAddressFriendly(AddressResource addressResource) {
+        try {
+            showMarkersForAddress(addressResource);
+        } catch (IOException e) {
+            showAlertDialog(createFriendlyErrorMessage(e, addressResource),
+                getString(R.string.app_name));
         }
     }
 
@@ -280,16 +300,18 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.menuItemZoomToMarkers) {
+        final int itemId = item.getItemId();
+
+        if (itemId == R.id.menuItemZoomToMarkers) {
             zoomToShowAllMarkers();
             return true;
         }
-        else if (item.getItemId() == R.id.menuItemToggleDisplayMode) {
+
+        if (itemId == R.id.menuItemToggleDisplayMode) {
             toggleDisplayMode();
             return true;
         }
-        else {
-            return super.onOptionsItemSelected(item);
-        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

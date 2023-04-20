@@ -1,15 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.map">
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Start AMAP Permissions -->
+
     <!-- 允许访问网络，必选权限 -->
-    <uses-permission android:name="android.permission.INTERNET" /> <!-- 允许获取粗略位置，若用GPS实现定位小蓝点功能则必选 -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- 允许获取设备和运营商信息，用于问题排查和网络定位，若无gps但仍需实现定位小蓝点功能则此权限必选 -->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" /> <!-- 允许获取网络状态，用于网络定位，若无gps但仍需实现定位小蓝点功能则此权限必选 -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- 允许获取wifi网络信息，用于网络定位，若无gps但仍需实现定位小蓝点功能则此权限必选 -->
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /> <!-- 允许获取wifi状态改变，用于网络定位，若无gps但仍需实现定位小蓝点功能则此权限必选 -->
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" /> <!-- 允许读设备等信息，用于问题排查 -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- 允许获取粗略位置，若用GPS实现定位小蓝点功能则必选 -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!-- 允许获取设备和运营商信息，用于问题排查和网络定位，若无gps但仍需实现定位小蓝点功能则此权限必选 -->
+    <!-- 不给高德这个权限，因为非必要而且触碰了用户隐私 -->
+    <!-- <uses-permission android:name="android.permission.READ_PHONE_STATE" /> -->
+
+    <!-- 允许获取网络状态，用于网络定位，若无gps但仍需实现定位小蓝点功能则此权限必选 -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- 允许获取wifi网络信息，用于网络定位，若无gps但仍需实现定位小蓝点功能则此权限必选 -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <!-- 允许获取wifi状态改变，用于网络定位，若无gps但仍需实现定位小蓝点功能则此权限必选 -->
+    <!-- 不给高德这个权限，没必要主动改变Wi-Fi状态，会干扰用户正常使用 -->
+    <!-- <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" /> -->
+
+    <!-- 允许读设备等信息，用于问题排查 -->
+    <!-- 不给高德这个权限，因为非必要而且触碰了用户隐私 -->
+    <!-- <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> -->
+
+    <!-- End AMAP Permissions -->
 
     <application
         android:allowBackup="true"
@@ -21,20 +41,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Map"
         tools:targetApi="31">
-        <activity
-            android:name=".activity.DetailsActivity"
-            android:exported="false" />
-
         <meta-data
             android:name="com.amap.api.v2.apikey"
             android:value="0c279e31144d9daa591896279350c481" />
+
+        <activity
+            android:name=".activity.DetailsActivity"
+            android:exported="false" />
 
         <activity
             android:name=".activity.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

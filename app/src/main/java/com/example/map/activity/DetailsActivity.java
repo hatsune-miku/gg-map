@@ -25,7 +25,7 @@ public class DetailsActivity extends BaseActivity {
 
         // Get address from intent.
         Intent intent = getIntent();
-        Address address = AddressUtil.fromIntent(intent);
+        Address address = AddressUtil.extractFromIntent(intent);
 
         PreferenceFragmentCompat fragmentCompat = new DetailsFragment(address);
 

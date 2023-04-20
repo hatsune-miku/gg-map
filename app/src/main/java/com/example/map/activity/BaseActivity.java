@@ -1,7 +1,6 @@
 package com.example.map.activity;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
 import android.view.LayoutInflater;
 
 import androidx.appcompat.app.AlertDialog;
@@ -13,23 +12,22 @@ public class BaseActivity extends AppCompatActivity {
     protected ViewLoadingBinding loadingBinding;
     protected AlertDialog loadingDialog;
 
-    protected void alertBox(
+    protected void showAlertDialog(
         String message,
-        String title,
-        DialogInterface.OnClickListener completion
+        String title
     ) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title)
             .setMessage(message)
-            .setPositiveButton("好", completion)
+            .setPositiveButton("好", null)
             .create()
             .show();
     }
 
     @SuppressLint("InflateParams")
-    protected void loadingBoxStart(String message) {
+    protected void loadingDialogOpen(String message) {
         if (loadingDialog != null || loadingBinding != null) {
-            loadingBoxStart(message);
+            loadingDialogOpen(message);
         }
 
         loadingBinding = ViewLoadingBinding.inflate(LayoutInflater.from(this));
@@ -38,19 +36,19 @@ public class BaseActivity extends AppCompatActivity {
             .setView(loadingBinding.getRoot())
             .create();
 
-        loadingBoxUpdate(message);
+        loadingDialogUpdate(message);
         loadingDialog.show();
     }
 
-    protected void loadingBoxUpdate(String message) {
+    protected void loadingDialogUpdate(String message) {
         if (loadingDialog == null || loadingBinding == null) {
-            loadingBoxStart(message);
+            loadingDialogOpen(message);
         }
 
         loadingBinding.textLoadingMessage.setText(message);
     }
 
-    protected void loadingBoxClose() {
+    protected void loadingDialogClose() {
         if (loadingDialog == null || loadingBinding == null) {
             return;
         }

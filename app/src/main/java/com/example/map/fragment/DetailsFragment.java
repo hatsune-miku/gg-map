@@ -1,18 +1,15 @@
 package com.example.map.fragment;
 
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.example.map.R;
-import com.example.map.annotation.AutoBind;
-import com.example.map.annotation.processor.PreferenceBinder;
+import com.example.map.annotation.preference.AutoBind;
+import com.example.map.annotation.preference.processor.PreferenceBinder;
 import com.example.map.model.Address;
-
-import java.util.Objects;
 
 public class DetailsFragment extends PreferenceFragmentCompat {
     @AutoBind
@@ -30,7 +27,7 @@ public class DetailsFragment extends PreferenceFragmentCompat {
     @AutoBind
     private Preference prefHeadName;
 
-    private Address address;
+    private final Address address;
 
     public DetailsFragment(Address address) {
         this.address = address;
@@ -48,6 +45,6 @@ public class DetailsFragment extends PreferenceFragmentCompat {
         prefPhoneNumber.setSummary(address.getPhoneNumber());
         prefHeadName.setSummary(address.getHeadName());
 
-        requireActivity().setTitle("详细信息");
+        requireActivity().setTitle(address.getName());
     }
 }

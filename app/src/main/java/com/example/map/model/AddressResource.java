@@ -1,6 +1,6 @@
 package com.example.map.model;
 
-public enum AddressBook {
+public enum AddressResource {
     // 专有名词直接拼音解决，翻译费力不讨好
     SAN_FANG_GONG_ZUO_ZHAN("三方工作站", "sanfanggongzuozhan"),
     JIAN_KANG_YI_ZHAN("健康驿站", "jiankangyizhan"),
@@ -15,7 +15,7 @@ public enum AddressBook {
     private final String name;
     private final String resourceName;
 
-    private AddressBook(String name, String resourceName) {
+    private AddressResource(String name, String resourceName) {
         this.name = name;
         this.resourceName = resourceName;
     }

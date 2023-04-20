@@ -1,7 +1,9 @@
 package com.example.map.model;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
 
 import java.io.Serializable;
 
@@ -13,6 +15,32 @@ public class Address implements Serializable {
     double lng;
     String phoneNumber;
     String headName;
+
+    public static Address fromRow(XSSFRow row) {
+        Address address = new Address();
+        address.setName(cellValueOrDefault(row, AddressColumn.NAME.getIndex(), "(数据为空)"));
+        address.setAddress(cellValueOrDefault(row, AddressColumn.ADDRESS.getIndex(), "(数据为空)"));
+        address.setService(cellValueOrDefault(row, AddressColumn.SERVICE.getIndex(), "(数据为空)"));
+        address.setPhoneNumber(cellValueOrDefault(row, AddressColumn.PHONE_NUMBER.getIndex(), "(数据为空)"));
+        address.setHeadName(cellValueOrDefault(row, AddressColumn.HEAD_NAME.getIndex(), "(数据为空)"));
+        address.setLat(row.getCell(AddressColumn.LAT.getIndex()).getNumericCellValue());
+        address.setLng(row.getCell(AddressColumn.LNG.getIndex()).getNumericCellValue());
+        return address;
+    }
+
+    public static String cellValueOrDefault(XSSFRow row, int index, String defaultValue) {
+        try {
+            XSSFCell cell = row.getCell(index);
+            cell.setCellType(Cell.CELL_TYPE_STRING);
+            return cell.getStringCellValue();
+        }
+        catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
+    public Address() {
+    }
 
     public Address(
         String name,
