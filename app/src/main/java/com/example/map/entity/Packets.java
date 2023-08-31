@@ -53,10 +53,17 @@ public class Packets {
     }
 
     @Builder
-    @Getter
     public static class PostCommentResponse {
+        @Getter
         boolean success;
         String message;
+
+        public String getMessage() {
+            if (message == null || message.isEmpty()) {
+                return "服务器错误";
+            }
+            return message;
+        }
     }
 
     @Builder
