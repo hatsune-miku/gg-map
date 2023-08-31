@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menuItemZoomToMarkers"
-        android:title="回到初始位置" />
-
+        android:title="回到初始位置"
+        android:icon="@drawable/replay"
+        app:showAsAction="ifRoom"
+    />
     <item
         android:id="@+id/menuItemToggleDisplayMode"
-        android:title="切换显示模式" />
+        android:title="切换显示模式"
+        android:icon="@drawable/display"
+        app:showAsAction="ifRoom"
+    />
 </menu>

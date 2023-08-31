@@ -1,5 +1,10 @@
 package com.example.map.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public enum AddressResource {
     // 专有名词直接拼音解决，翻译费力不讨好
     SAN_FANG_GONG_ZUO_ZHAN("三方工作站", "sanfanggongzuozhan"),
@@ -14,17 +19,4 @@ public enum AddressResource {
 
     private final String name;
     private final String resourceName;
-
-    private AddressResource(String name, String resourceName) {
-        this.name = name;
-        this.resourceName = resourceName;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getResourceName() {
-        return resourceName;
-    }
 }

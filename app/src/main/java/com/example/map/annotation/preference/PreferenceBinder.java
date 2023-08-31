@@ -1,4 +1,4 @@
-package com.example.map.annotation.preference.processor;
+package com.example.map.annotation.preference;
 
 import android.util.Log;
 
@@ -15,7 +15,7 @@ public class PreferenceBinder {
 
     public static void bind(PreferenceFragmentCompat fragment) {
         Class<?> clazz = fragment.getClass();
-        Field[] fields = clazz.getDeclaredFields();
+        var fields = clazz.getDeclaredFields();
 
         Arrays.stream(fields)
             .filter(field -> field.isAnnotationPresent(AutoBind.class))
@@ -24,7 +24,7 @@ public class PreferenceBinder {
 
     private static void bind(PreferenceFragmentCompat fragment, Field field) {
         // Try to get the annotation.
-        AutoBind bind = field.getAnnotation(AutoBind.class);
+        var bind = field.getAnnotation(AutoBind.class);
         assert bind != null;
 
         String prefName = bind.key().isEmpty()
@@ -32,7 +32,7 @@ public class PreferenceBinder {
             : bind.key();
 
         // Auto-wire the preference.
-        Preference preference = fragment.findPreference(prefName);
+        var preference = fragment.findPreference(prefName);
         if (preference == null) {
             Log.e(TAG, "Could not find preference " + prefName);
             throw new RuntimeException("Could not find preference " + prefName);

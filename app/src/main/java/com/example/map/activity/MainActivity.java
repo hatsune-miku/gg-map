@@ -1,317 +1,144 @@
 package com.example.map.activity;
 
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-
-import android.content.Intent;
+import android.app.Activity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
 import android.widget.Toast;
 
-import com.amap.api.maps2d.CameraUpdateFactory;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.WindowCompat;
+import androidx.fragment.app.Fragment;
+
 import com.amap.api.maps2d.MapView;
-import com.amap.api.maps2d.AMap;
-import com.amap.api.maps2d.model.BitmapDescriptorFactory;
-import com.amap.api.maps2d.model.LatLng;
-import com.amap.api.maps2d.model.LatLngBounds;
-import com.amap.api.maps2d.model.Marker;
-import com.amap.api.maps2d.model.MarkerOptions;
 import com.example.map.R;
 import com.example.map.databinding.ActivityMainBinding;
-import com.example.map.util.AddressUtil;
-import com.example.map.model.Address;
-import com.example.map.model.AddressResource;
-import com.example.map.model.SheetHelper;
+import com.example.map.fragment.AboutFragment;
+import com.example.map.fragment.MapFragment;
+import com.example.map.helper.AccountHelper;
+import com.example.map.helper.ActivityHelper;
+import com.google.android.material.elevation.SurfaceColors;
 
-import org.apache.poi.xssf.usermodel.XSSFRow;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
+import java.lang.ref.WeakReference;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
-public class MainActivity extends BaseActivity {
-    protected enum DisplayMode {
-        SHOW_ALL, SHOW_ONE
-    }
-
+public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
+    private AboutFragment fragmentAbout;
     private ActivityMainBinding binding;
-
-    /**
-     * 地图对象和地图SDK的对象
-     */
-    private MapView mapView = null;
-    private AMap amap = null;
-
-    private final List<AddressResource> addressResources = List.of(AddressResource.values());
-    private AddressResource currentAddressResource = addressResources.get(0);
-
-    private final Map<String, SheetHelper> cachedSheetHelpers = new HashMap<>();
-    private final List<Marker> markers = new ArrayList<>();
-
-    private DisplayMode displayMode = DisplayMode.SHOW_ONE;
-
+    private ActivityHelper activityHelper;
+    private AccountHelper accountHelper;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        activityHelper = new ActivityHelper(this);
+        accountHelper = new AccountHelper(this);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // 获取地图控件引用
-        mapView = binding.map;
-        mapView.onCreate(savedInstanceState);
-
-        // 初始化高德地图控制器对象
-        if (amap == null) {
-            amap = mapView.getMap();
-        }
+        fragmentAbout = new AboutFragment();
 
         bind();
-        clearMarkers();
-        showMarkersForAddressFriendly(currentAddressResource);
+
+        // 自动登录
+        tryAutomaticLogin();
+
+        selectFragment(new MapFragment());
+
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        activityHelper.setStatusBarColor(SurfaceColors.SURFACE_2.getColor(this));
     }
 
-    /**
-     * 启动DetailsActivity然后在其中显示地址信息
-     *
-     * @param address -
-     */
-    private void showAddressInDetails(Address address) {
-        Intent intent = new Intent();
-        AddressUtil.putIntoIntent(address, intent);
-        intent.setClass(this, DetailsActivity.class);
-        startActivity(intent);
-    }
-
-    /**
-     * 事件绑定
-     */
     private void bind() {
-        // 标点点击事件
-        amap.setOnMarkerClickListener(marker -> {
-            // Marker not binded to an address?
-            if (!(marker.getObject() instanceof Address address)) {
+        binding.bottomNavigationView.setOnItemSelectedListener( item -> {
+            // 此处不应当重用MapFragment，而是每次都创建一个新的
+            // 否则发生重用后，MapView会显示不了标点
+            var menuToFragmentMap = Map.of(
+                R.id.itemMainPage, new MapFragment(),
+                R.id.itemAboutPage, fragmentAbout
+            );
+
+            if (!menuToFragmentMap.containsKey(item.getItemId())) {
                 return false;
             }
 
-            showAddressInDetails(address);
-            return false;
-        });
+            var fragment = menuToFragmentMap.get(item.getItemId());
+            assert fragment != null;
 
-        // 切换位置
-        binding.fabSwitchArea.setOnClickListener(v -> {
-            String[] array = addressResources.stream()
-                .map(r -> "🏠 " + r.getName())
-                .toArray(String[]::new);
-
-            new AlertDialog.Builder(this)
-                .setTitle("切换地点...")
-                .setItems(array, (dialog, which) -> {
-                    clearMarkers();
-                    currentAddressResource = addressResources.get(which);
-                    showMarkersForAddressFriendly(currentAddressResource);
-                    displayMode = DisplayMode.SHOW_ONE;
-                })
-                .setCancelable(true)
-                .create()
-                .show();
+            selectFragment(fragment);
+            return true;
         });
     }
 
-    private SheetHelper retrieveSheetHelper(String resourceName) throws IOException {
-        if (cachedSheetHelpers.containsKey(resourceName)) {
-            return cachedSheetHelpers.get(resourceName);
-        }
-
-        // Create new if not cached.
-        SheetHelper helper = new SheetHelper(this, currentAddressResource.getResourceName());
-        cachedSheetHelpers.put(resourceName, helper);
-        return helper;
+    private void selectFragment(Fragment fragment) {
+        getSupportFragmentManager()
+            .beginTransaction()
+            .replace(R.id.frameLayout, fragment)
+            .commit();
     }
 
-    /**
-     * 切换地区，更新标点
-     * <p>
-     * 不会自动清空之前的标点，甚至同地区的标点也会重复添加
-     * 所以调用之前记得手动调用 <code>clearMarker()</code>
-     * <p>
-     * 带有缓存功能，不会重复解析xlsx文档
-     */
-    private void showMarkersForAddress(AddressResource addressResource) throws IOException {
-        String resourceName = addressResource.getResourceName();
-        SheetHelper helper = retrieveSheetHelper(resourceName);
-
-        loadingDialogOpen("创建标点...");
-
-        try {
-            int lastRowIndex = helper.getLastRowIndex();
-            for (int i = helper.getFirstRowIndex(); i <= lastRowIndex; ++i) {
-                try {
-                    XSSFRow row = helper.getSheet().getRow(i);
-                    addMarker(Address.fromRow(row));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-            // 更新标签内容
-            binding.textCurrentLocation.setText(
-                addressResource.getName());
-            setTitle(String.format(Locale.ROOT, "%s (共 %d 个标点)",
-                addressResource.getName(), lastRowIndex));
-
-            // 缩放
-            zoomToShowAllMarkers();
-        } finally {
-            loadingDialogClose();
-        }
-    }
-
-    /**
-     * 清空当前标点，然后同时展示所有地区的所有标点！
-     */
-    private void showMarkersForAllAddresses() {
-        clearMarkers();
-        ArrayList<String> errorMessages = new ArrayList<>();
-
-        for (AddressResource resource : addressResources) {
+    private void tryAutomaticLogin() {
+        Handler loginResultHandler = new LoginResultHandler(this);
+        Executors.newSingleThreadExecutor().execute(() -> {
             try {
-                showMarkersForAddress(resource);
-            } catch (IOException e) {
-                errorMessages.add(createFriendlyErrorMessage(e, resource));
+                loginResultHandler.sendEmptyMessage(
+                    accountHelper.tryLoginWithSavedToken().get()
+                        ? LoginResultHandler.MessageLoginSucceeded
+                        : LoginResultHandler.MessageLoginFailed
+                );
+            } catch (Exception e) {
+                Log.e(TAG, "tryAutomaticLogin: ", e);
             }
+        });
+    }
+
+    /**
+     * 从线程回到UI线程的一种方法，使用Handler
+     * Handler因为特殊性，需要持有对Activity的弱引用
+     */
+    private static class LoginResultHandler extends Handler {
+        final static int MessageLoginFailed = 0;
+        final static int MessageLoginSucceeded = 1;
+        private final WeakReference<Activity> activityReference;
+
+        public LoginResultHandler(Activity activity) {
+            super(activity.getMainLooper());
+            activityReference = new WeakReference<>(activity);
         }
 
-        if (!errorMessages.isEmpty()) {
-            String errorMessage = "遇到下列错误:\n\n" + String.join("\n", errorMessages);
-            showAlertDialog(errorMessage, getString(R.string.app_name));
-        }
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            Activity activity = activityReference.get();
+            switch (msg.what) {
+                case MessageLoginFailed ->
+                    // 如果自动登录失败，就跳转到登录页面
+                    LoginActivity.show(activity);
 
-        binding.textCurrentLocation.setText("所有地区");
-        setTitle("所有地区共 " + cachedSheetHelpers.values().stream()
-            .map(SheetHelper::getLastRowIndex)
-            .reduce(0, Integer::sum) + " 个标点");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mapView.onDestroy();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mapView.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mapView.onPause();
-    }
-
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        mapView.onSaveInstanceState(outState);
-    }
-
-    protected void addMarker(Address address) {
-        MarkerOptions option = new MarkerOptions()
-            .title("")
-            .position(new LatLng(address.getLat(), address.getLng()))
-            .icon(BitmapDescriptorFactory.defaultMarker());
-        // option.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory
-        //         .decodeResource(getResources(),R.drawable.location_marker)));
-
-        Marker marker = amap.addMarker(option);
-        marker.setTitle(null);
-        marker.setObject(address);
-        markers.add(marker);
-    }
-
-    protected void clearMarkers() {
-        markers.forEach(Marker::remove);
-        markers.clear();
-    }
-
-    protected void zoomToShowAllMarkers() {
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        for (Marker marker : markers) {
-            builder.include(marker.getPosition());
-        }
-        amap.moveCamera(CameraUpdateFactory.newLatLngBounds(
-            builder.build(), 0));
-    }
-
-    protected void toggleDisplayMode() {
-        switch (displayMode) {
-            case SHOW_ONE -> {
-                showMarkersForAllAddresses();
-                displayMode = DisplayMode.SHOW_ALL;
-                Toast.makeText(this, "现在将同时展示所有标点", Toast.LENGTH_SHORT).show();
-            }
-
-            case SHOW_ALL -> {
-                clearMarkers();
-                showMarkersForAddressFriendly(currentAddressResource);
-                displayMode = DisplayMode.SHOW_ONE;
-                Toast.makeText(this, "现在将仅显示指定标点", Toast.LENGTH_SHORT).show();
+                case MessageLoginSucceeded ->
+                    // 如果自动登录成功，就显示欢迎信息
+                    Toast.makeText(
+                        activity,
+                        "欢迎回来，" + new AccountHelper(activity).getLoggingInUsername().orElse(""),
+                        Toast.LENGTH_SHORT
+                    ).show();
             }
         }
     }
 
-    private String createFriendlyErrorMessage(Exception e, AddressResource resource) {
-        if (e instanceof FileNotFoundException) {
-            // 资源文件没找到？
-            return String.format(
-                "资源文件 (%s) 不存在",
-                resource.getResourceName());
-        }
+    protected void logout() {
+        accountHelper.logout();
 
-        return String.format(
-            "资源文件 (%s) 存在但无法读取，因为 (%s)",
-            resource.getResourceName(),
-            e.getLocalizedMessage());
-    }
-
-    private void showMarkersForAddressFriendly(AddressResource addressResource) {
-        try {
-            showMarkersForAddress(addressResource);
-        } catch (IOException e) {
-            showAlertDialog(createFriendlyErrorMessage(e, addressResource),
-                getString(R.string.app_name));
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        final int itemId = item.getItemId();
-
-        if (itemId == R.id.menuItemZoomToMarkers) {
-            zoomToShowAllMarkers();
-            return true;
-        }
-
-        if (itemId == R.id.menuItemToggleDisplayMode) {
-            toggleDisplayMode();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        // 清除账号信息后，再走一遍自动登录流程，使其弹出登录页面
+        activityHelper.showAlertDialog(
+            "确认要退出登录吗？", "退出登录",
+            "退出登录", this::tryAutomaticLogin,
+            "取消", null);
     }
 }

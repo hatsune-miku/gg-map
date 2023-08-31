@@ -3,12 +3,12 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.example.map"
         minSdk 24
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -33,20 +33,41 @@ android {
         }
     }
 
-    viewBinding {
-        enabled = true
+    buildFeatures {
+        dataBinding = true
     }
+
     namespace 'com.example.map'
 }
 
 dependencies {
-    annotationProcessor 'org.projectlombok:lombok:1.18.26'
+    implementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'junit:junit:4.13.2'
+
+    // Material 3
+    implementation 'com.google.android.material:material:1.9.0'
+
+    // Picasso
+    implementation 'com.squareup.picasso:picasso:2.71828'
+
+    // Lombok
+    implementation 'org.projectlombok:lombok:1.18.28'
+    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.28'
+
+    // Gson
+    implementation 'com.google.code.gson:gson:2.10.1'
+
+    // Http client
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+
+    // MVVM
+    implementation 'android.arch.lifecycle:extensions:1.1.1'
 
     implementation "androidx.lifecycle:lifecycle-viewmodel"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx"
-    implementation 'androidx.preference:preference:1.2.0'
+    implementation 'androidx.preference:preference:1.2.1'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.8.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     // Third party

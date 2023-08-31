@@ -6,113 +6,59 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 
 import java.io.Serializable;
+import java.util.Locale;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
+@Builder
+@Getter
+@Setter
+@AllArgsConstructor
 public class Address implements Serializable {
-    String name;
-    String address;
-    String service;
-    double lat;
-    double lng;
-    String phoneNumber;
-    String headName;
+    private String name;
+    private String address;
+    private String service;
+    private double latitude;
+    private double longitude;
+    private String phoneNumber;
+    private String headName;
+
+    private static String TextEmptyData = "(数据为空)";
 
     public static Address fromRow(XSSFRow row) {
-        Address address = new Address();
-        address.setName(cellValueOrDefault(row, AddressColumn.NAME.getIndex(), "(数据为空)"));
-        address.setAddress(cellValueOrDefault(row, AddressColumn.ADDRESS.getIndex(), "(数据为空)"));
-        address.setService(cellValueOrDefault(row, AddressColumn.SERVICE.getIndex(), "(数据为空)"));
-        address.setPhoneNumber(cellValueOrDefault(row, AddressColumn.PHONE_NUMBER.getIndex(), "(数据为空)"));
-        address.setHeadName(cellValueOrDefault(row, AddressColumn.HEAD_NAME.getIndex(), "(数据为空)"));
-        address.setLat(row.getCell(AddressColumn.LAT.getIndex()).getNumericCellValue());
-        address.setLng(row.getCell(AddressColumn.LNG.getIndex()).getNumericCellValue());
-        return address;
+        return Address.builder()
+            .name(cellValueOrDefault(row, AddressColumn.NAME.getIndex(), TextEmptyData))
+            .address(cellValueOrDefault(row, AddressColumn.ADDRESS.getIndex(), TextEmptyData))
+            .service(cellValueOrDefault(row, AddressColumn.SERVICE.getIndex(), TextEmptyData))
+            .phoneNumber(cellValueOrDefault(row, AddressColumn.PHONE_NUMBER.getIndex(), TextEmptyData))
+            .headName(cellValueOrDefault(row, AddressColumn.HEAD_NAME.getIndex(), TextEmptyData))
+            .latitude(row.getCell(AddressColumn.LAT.getIndex()).getNumericCellValue())
+            .longitude(row.getCell(AddressColumn.LNG.getIndex()).getNumericCellValue())
+            .build();
     }
 
-    public static String cellValueOrDefault(XSSFRow row, int index, String defaultValue) {
+    /**
+     * 获取地址的唯一标识符
+     */
+    public String getSiteIdentifier() {
+        return String.format(Locale.ROOT, latitude + "," + longitude);
+    }
+
+    /**
+     * 获取一行单元格中第index个的值，如果单元格不存在或者单元格的值为空，则返回默认值。
+     * @param index 从1开始
+     */
+    private static String cellValueOrDefault(XSSFRow row, int index, String defaultValue) {
         try {
-            XSSFCell cell = row.getCell(index);
+            var cell = row.getCell(index);
             cell.setCellType(Cell.CELL_TYPE_STRING);
             return cell.getStringCellValue();
         }
         catch (Exception e) {
             return defaultValue;
         }
-    }
-
-    public Address() {
-    }
-
-    public Address(
-        String name,
-        String address,
-        String service,
-        String phoneNumber,
-        String headName,
-        double lat,
-        double lng
-    ) {
-        this.name = name;
-        this.address = address;
-        this.service = service;
-        this.lat = lat;
-        this.lng = lng;
-        this.phoneNumber = phoneNumber;
-        this.headName = headName;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public double getLat() {
-        return lat;
-    }
-
-    public void setLat(double lat) {
-        this.lat = lat;
-    }
-
-    public double getLng() {
-        return lng;
-    }
-
-    public void setLng(double lng) {
-        this.lng = lng;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getHeadName() {
-        return headName;
-    }
-
-    public void setHeadName(String headName) {
-        this.headName = headName;
-    }
-
-    public String getService() {
-        return service;
-    }
-
-    public void setService(String service) {
-        this.service = service;
     }
 }
