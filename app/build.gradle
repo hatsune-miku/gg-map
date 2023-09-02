@@ -20,6 +20,13 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+
+        applicationVariants.all { variant ->
+            variant.outputs.each { output ->
+                def date = new Date().format("yyyy-MM-dd_HH-mm-ss")
+                output.outputFileName = "map-release-${date}.apk"
+            }
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
