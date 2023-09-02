@@ -15,6 +15,7 @@ import com.example.map.databinding.ViewBottomSheetItemBinding;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.util.List;
+import java.util.Objects;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

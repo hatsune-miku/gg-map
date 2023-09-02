@@ -71,8 +71,8 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     // Third party
-    implementation files('libs/AMap2DMap_6.0.0_AMapSearch_9.2.0_AMapLocation_6.1.0_20220414.jar')
-    implementation files('libs/jxl.jar')
+    implementation files('libs/Amap_2DMap_V6.0.0_20191106.jar')
+    // implementation files('libs/AMap2DMap_6.0.0_AMapSearch_9.2.0_AMapLocation_6.1.0_20220414.jar')
     implementation files('libs/poi-3.12-android-a.jar')
     implementation files('libs/poi-ooxml-schemas-3.12-20150511-a.jar')
 

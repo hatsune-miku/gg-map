@@ -2,6 +2,7 @@ package com.example.map.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,6 +24,7 @@ import com.amap.api.maps2d.model.Marker;
 import com.amap.api.maps2d.model.MarkerOptions;
 import com.example.map.R;
 import com.example.map.activity.DetailsActivity;
+import com.example.map.activity.LoginActivity;
 import com.example.map.databinding.FragmentMapBinding;
 import com.example.map.helper.AccountHelper;
 import com.example.map.helper.ActivityHelper;
@@ -30,6 +32,8 @@ import com.example.map.model.Address;
 import com.example.map.model.AddressResource;
 import com.example.map.model.SheetHelper;
 import com.example.map.util.AddressUtil;
+import com.google.android.material.color.DynamicColors;
+import com.google.android.material.color.utilities.DynamicColor;
 
 import org.apache.poi.xssf.usermodel.XSSFRow;
 
@@ -40,6 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class MapFragment extends Fragment {
@@ -133,10 +138,10 @@ public class MapFragment extends Fragment {
      * @param address -
      */
     private void showAddressInDetails(Address address) {
-        var intent = new Intent();
-        AddressUtil.putIntoIntent(address, intent);
-        intent.setClass(hostActivity, DetailsActivity.class);
-        startActivity(intent);
+         var intent = new Intent();
+         AddressUtil.putIntoIntent(address, intent);
+         intent.setClass(hostActivity, DetailsActivity.class);
+         startActivity(intent);
     }
 
     /**
@@ -187,7 +192,7 @@ public class MapFragment extends Fragment {
         });
     }
 
-    private SheetHelper retrieveSheetHelper(String resourceName) throws IOException {
+    private SheetHelper getSheetHelper(String resourceName) throws IOException {
         if (cachedSheetHelpers.containsKey(resourceName)) {
             return cachedSheetHelpers.get(resourceName);
         }
@@ -208,7 +213,7 @@ public class MapFragment extends Fragment {
      */
     private void showMarkersForAddress(AddressResource addressResource) throws IOException {
         String resourceName = addressResource.getResourceName();
-        var helper = retrieveSheetHelper(resourceName);
+        var helper = getSheetHelper(resourceName);
 
         activityHelper.loadingDialogOpen("创建标点...");
 
@@ -231,6 +236,9 @@ public class MapFragment extends Fragment {
 
             // 缩放
             zoomToShowAllMarkers();
+
+            // 重绘底部工具栏，修复高德SDK的marker bug
+            redrawBottomAppBarToFixAmapBug();
         } finally {
             activityHelper.loadingDialogClose();
         }
@@ -267,12 +275,6 @@ public class MapFragment extends Fragment {
             .title("")
             .position(new LatLng(address.getLatitude(), address.getLongitude()))
             .icon(BitmapDescriptorFactory.defaultMarker());
-
-        /*
-        option.icon(BitmapDescriptorFactory.fromBitmap(
-                BitmapFactory.decodeResource(getResources(), R.drawable.noimage)));
-         */
-
         var marker = amap.addMarker(option);
         marker.setTitle(null);
         marker.setObject(address);
@@ -291,6 +293,12 @@ public class MapFragment extends Fragment {
         }
         amap.moveCamera(CameraUpdateFactory.newLatLngBounds(
             builder.build(), 0));
+    }
+
+    protected void redrawBottomAppBarToFixAmapBug() {
+        var backup = binding.bottomAppBar.getBackground();
+        binding.bottomAppBar.setBackgroundColor(Color.DKGRAY);
+        binding.bottomAppBar.setBackground(backup);
     }
 
     protected void toggleDisplayMode() {

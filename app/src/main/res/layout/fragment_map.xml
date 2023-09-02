@@ -31,17 +31,17 @@
             android:id="@+id/map"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@+id/coordinatorLayout"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/innerConstraintLayout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/appBarLayout">
 
         </com.amap.api.maps2d.MapView>
 
-        <androidx.coordinatorlayout.widget.CoordinatorLayout
-            android:id="@+id/coordinatorLayout"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/innerConstraintLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="80dp"
+            android:background="@android:color/holo_red_dark"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
@@ -49,48 +49,57 @@
             <com.google.android.material.bottomappbar.BottomAppBar
                 android:id="@+id/bottomAppBar"
                 style="@style/Widget.Material3.BottomAppBar"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_margin="0dp"
+                android:paddingBottom="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
                 app:menu="@menu/menu_main"
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:layout_gravity="bottom" />
+                tools:ignore="BottomAppBar" />
 
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginEnd="12dp"
+                android:gravity="end"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/fabSwitchArea"
+                app:layout_constraintTop_toTopOf="parent"
+            >
 
-        </androidx.coordinatorlayout.widget.CoordinatorLayout>
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="当前位置"
+                    android:textSize="12sp" />
 
+                <TextView
+                    android:id="@+id/textCurrentLocation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="一个一个工作站"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabSwitchArea"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
-            android:src="@drawable/location"
-            android:elevation="0dp"
-            app:pressedTranslationZ="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabSwitchArea"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/location"
+                android:elevation="0dp"
+                app:hoveredFocusedTranslationZ="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/bottomAppBar" />
 
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:text="当前位置"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toStartOf="@+id/fabSwitchArea"
-            app:layout_constraintTop_toTopOf="@+id/coordinatorLayout" />
-
-        <TextView
-            android:id="@+id/textCurrentLocation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:text="一个一个工作站"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@+id/fabSwitchArea"
-            app:layout_constraintTop_toBottomOf="@+id/textView2" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -71,7 +71,6 @@ public class DetailsActivity extends AppCompatActivity implements CommentAdapter
             .commit();
 
         refreshComments();
-
         setupOnImagePickedListener();
 
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
