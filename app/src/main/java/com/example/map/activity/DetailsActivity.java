@@ -144,6 +144,11 @@ public class DetailsActivity extends AppCompatActivity implements CommentAdapter
         String content = Objects.requireNonNull(binding.editTextComment.getText()).toString();
         String author = accountHelper.getLoggingInUsername().orElse("User");
 
+        if (content.isBlank()) {
+            loading = false;
+            return;
+        }
+
         var fragment = new CommentPreviewFragment(content, author);
         var view = fragment.prepareView(getLayoutInflater());
 
