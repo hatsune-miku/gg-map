@@ -8,6 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBarLayout"
             android:layout_width="match_parent"
@@ -15,22 +16,20 @@
             android:fitsSystemWindows="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            >
+            app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.appbar.CollapsingToolbarLayout
                 style="?attr/collapsingToolbarLayoutMediumStyle"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/collapsingToolbarLayoutMediumSize"
-            >
+                android:layout_height="?attr/collapsingToolbarLayoutMediumSize">
+
                 <com.google.android.material.appbar.MaterialToolbar
                     android:id="@+id/topAppBar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:title="Map"
                     android:elevation="0dp"
                     app:navigationIcon="@drawable/arrow_back"
-                />
+                    app:title="Map" />
 
             </com.google.android.material.appbar.CollapsingToolbarLayout>
 
@@ -51,15 +50,15 @@
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="24dp"
                     android:layout_margin="24dp"
                     android:background="@color/design_default_color_background"
-                >
+                    android:padding="24dp">
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                    >
+                        android:orientation="vertical">
+
                         <ImageView
                             android:id="@+id/addressImageView"
                             android:layout_width="match_parent"
@@ -77,37 +76,36 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                >
+                    android:orientation="vertical">
+
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingHorizontal="24dp"
                         android:layout_marginHorizontal="24dp"
                         android:background="@color/design_default_color_background"
-                    >
+                        android:paddingHorizontal="24dp">
+
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:orientation="horizontal"
-                            >
+                            android:orientation="horizontal">
+
                             <com.google.android.material.textfield.TextInputLayout
                                 android:id="@+id/textInputLayoutComment"
+                                style="?attr/textInputFilledStyle"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:hint="写评论"
-                                app:startIconDrawable="@drawable/rate_review"
-                                app:endIconMode="custom"
                                 app:endIconDrawable="@drawable/send"
-                                style="?attr/textInputFilledStyle"
-                                >
+                                app:endIconMode="custom"
+                                app:startIconDrawable="@drawable/rate_review">
+
                                 <com.google.android.material.textfield.TextInputEditText
                                     android:id="@+id/editTextComment"
                                     android:layout_width="match_parent"
                                     android:layout_height="match_parent"
-                                    android:inputType="text"
-                                    />
+                                    android:inputType="text" />
                             </com.google.android.material.textfield.TextInputLayout>
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
@@ -117,20 +115,19 @@
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="24dp"
                         android:layout_marginTop="24dp"
-                        android:layout_marginBottom="24dp"
-                    >
+                        android:layout_marginBottom="24dp">
+
                         <androidx.recyclerview.widget.RecyclerView
                             android:id="@+id/commentRecyclerView"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            />
+                            android:layout_height="wrap_content" />
+
                         <com.google.android.material.textview.MaterialTextView
                             android:id="@+id/textViewNoComment"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:text="暂无评论"
-                            />
+                            android:text="暂无评论" />
                     </FrameLayout>
                 </LinearLayout>
             </LinearLayout>
