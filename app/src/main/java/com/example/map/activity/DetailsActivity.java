@@ -18,6 +18,7 @@ import com.example.map.R;
 import com.example.map.adapter.CommentAdapter;
 import com.example.map.databinding.ActivityDetailsBinding;
 import com.example.map.entity.Packets;
+import com.example.map.fragment.CommentPreviewFragment;
 import com.example.map.fragment.DetailsPreferencesFragment;
 import com.example.map.helper.AccountHelper;
 import com.example.map.helper.ActivityHelper;
@@ -26,6 +27,7 @@ import com.example.map.util.AddressUtil;
 import com.example.map.model.Address;
 import com.example.map.util.NetworkUtil;
 import com.example.map.util.PermissionUtil;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.elevation.SurfaceColors;
 
 import java.io.File;
@@ -133,6 +135,54 @@ public class DetailsActivity extends AppCompatActivity implements CommentAdapter
         });
     }
 
+    private void performSendComment(String token) {
+        if (loading) {
+            return;
+        }
+        loading = true;
+
+        String content = Objects.requireNonNull(binding.editTextComment.getText()).toString();
+        String author = accountHelper.getLoggingInUsername().orElse("User");
+
+        var fragment = new CommentPreviewFragment(content, author);
+        var view = fragment.prepareView(getLayoutInflater());
+
+        var builder = new MaterialAlertDialogBuilder(this)
+            .setTitle("预览评论")
+            .setView(view)
+            .setCancelable(false)
+            .setNegativeButton("取消", (d, w) -> loading = false)
+            .setPositiveButton("发布", (d, w) -> executor.execute(() -> {
+                try {
+                    var result = NetworkUtil.postComment(
+                        Packets.PostCommentPacket.builder()
+                            .comment(content)
+                            .siteIdentifier(address.getSiteIdentifier())
+                            .rating(fragment.getRating())
+                            .build(),
+                        token
+                    ).get();
+                    if (result.isSuccess()) {
+                        refreshComments();
+                    }
+                    runOnUiThread(() -> {
+                        binding.editTextComment.setText("");
+                        Toast.makeText(this, result.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+                }
+                catch (Exception e) {
+                    Log.e(TAG, "bind: ", e);
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, "发送评论失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    });
+                }
+                finally {
+                    loading = false;
+                }
+            }));
+        builder.create().show();
+    }
+
     private void onSendComment() {
         Optional<String> tokenOpt = accountHelper.getToken();
         if (!tokenOpt.isPresent()) {
@@ -140,39 +190,7 @@ public class DetailsActivity extends AppCompatActivity implements CommentAdapter
             return;
         }
         String token = tokenOpt.get();
-
-        if (loading) {
-            return;
-        }
-        loading = true;
-
-        executor.execute(() -> {
-            try {
-                var result = NetworkUtil.postComment(
-                    Packets.PostCommentPacket.builder()
-                        .comment(Objects.requireNonNull(binding.editTextComment.getText()).toString())
-                        .siteIdentifier(address.getSiteIdentifier())
-                        .build(),
-                    token
-                ).get();
-                if (result.isSuccess()) {
-                    refreshComments();
-                }
-                runOnUiThread(() -> {
-                    binding.editTextComment.setText("");
-                    Toast.makeText(this, result.getMessage(), Toast.LENGTH_SHORT).show();
-                });
-            }
-            catch (Exception e) {
-                Log.e(TAG, "bind: ", e);
-                runOnUiThread(() -> {
-                    Toast.makeText(this, "发送评论失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
-            }
-            finally {
-                loading = false;
-            }
-        });
+        performSendComment(token);
     }
 
     private void setupOnImagePickedListener() {

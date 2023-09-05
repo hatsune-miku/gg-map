@@ -25,6 +25,16 @@
                     android:textFontWeight="700"
                     android:text="Comment"
                 />
+
+                <RatingBar
+                    android:id="@+id/ratingBar"
+                    style="?android:attr/ratingBarStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:isIndicator="true"
+                    android:stepSize="1"
+                    android:numStars="5" />
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/carouselRecyclerView"
                     android:layout_width="match_parent"

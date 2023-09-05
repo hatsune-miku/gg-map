@@ -58,6 +58,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
         // Setup basic information.
         binding.textComment.setText(comment.getComment());
         binding.textCommentAuthor.setText("@" + comment.getUsername());
+        binding.ratingBar.setRating((float) comment.getRating());
 
         // Setup images.
         if (comment.getImageUrls().isEmpty()) {

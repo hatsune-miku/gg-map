@@ -43,6 +43,7 @@ public class AboutFragment extends Fragment {
     }
 
     private void bind() {
+        binding.topAppBar.setTitle(accountHelper.getLoggingInUsername().orElse("尚未登录"));
         binding.buttonLogout.setOnClickListener(v -> {
             accountHelper.logout();
             LoginActivity.show(hostActivity);

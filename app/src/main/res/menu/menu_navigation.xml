@@ -9,5 +9,5 @@
         android:id="@+id/itemAboutPage"
         android:enabled="true"
         android:icon="@drawable/face"
-        android:title="关于"/>
+        android:title="我"/>
 </menu>

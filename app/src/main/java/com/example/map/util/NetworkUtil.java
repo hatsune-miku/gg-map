@@ -27,7 +27,8 @@ public class NetworkUtil {
     private static final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(4);
 
 
-    public static final String BASE_URL = "http://mikutart.com:8080";
+    // public static final String BASE_URL = "http://mikutart.com:8080";
+    public static final String BASE_URL = "http://10.0.0.205:8080";
 
     public static Future<LoginResponse> login(LoginPacket packet) {
         return new HttpRequest<LoginPacket, LoginResponse>(LoginPacket.class, LoginResponse.class)
